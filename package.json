@@ -1,0 +1,20 @@
+{
+  "name": "nfts2me-aptos",
+  "version": "1.0.0",
+  "description": "Web3 NFT minting platform built on Aptos with Shelby Protocol storage",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "turbo run format"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.12",
+    "typescript": "^5.0.0"
+  }
+}

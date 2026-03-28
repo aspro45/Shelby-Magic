@@ -1,0 +1,16 @@
+[package]
+name = "nft_collection"
+version = "0.1.0"
+
+[addresses]
+nft_collection = "0x0"
+
+[dependencies.AptosStdlib]
+git = "https://github.com/aptos-labs/aptos-core.git"
+git_rev = "main"
+subdir = "aptos-move/framework/aptos-stdlib"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+git_rev = "main"
+subdir = "aptos-move/framework/aptos-framework"
