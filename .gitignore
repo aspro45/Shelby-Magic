@@ -12,3 +12,5 @@ out/
 .env
 .env.example
 .vercel
+
+.vercel
