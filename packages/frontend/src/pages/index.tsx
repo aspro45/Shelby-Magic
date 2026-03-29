@@ -129,7 +129,7 @@ export default function Home() {
               href="/explore"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-lg font-bold rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all"
             >
-              Explore Collections
+              🌐 Explore Collections
             </a>
             <a
               href="/create"

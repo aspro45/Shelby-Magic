@@ -127,7 +127,7 @@ export default function MintPage() {
             </p>
             <div className="flex gap-3 justify-center">
               <a href="/explore" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold transition">
-                Explore Collections
+                🌐 Explore Collections
               </a>
               <a href="/dashboard" className="px-6 py-3 bg-slate-800 border border-slate-600 text-white rounded-xl font-semibold transition">
                 Back to Dashboard
