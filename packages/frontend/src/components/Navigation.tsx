@@ -19,7 +19,7 @@ export function Navigation({ balance = '0' }: NavigationProps) {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/explore', label: '🌐 Explore' },
+    { href: '/explore', label: 'Explore' },
     { href: '/create', label: 'Create' },
     { href: '/dashboard', label: 'Dashboard' },
   ];
