@@ -297,7 +297,7 @@ export default function ExplorePage() {
       {/* Hero */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
         <div className="mb-4 inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-500/30">
-          <span className="text-purple-300 text-xs font-semibold">🌐 Community NFT Marketplace</span>
+          <span className="text-purple-300 text-xs font-semibold">Community NFT Marketplace</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent mb-4">
           Explore & Mint
