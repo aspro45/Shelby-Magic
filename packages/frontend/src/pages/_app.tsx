@@ -63,6 +63,14 @@ class AppErrorBoundary extends Component<{ children: React.ReactNode }, ErrorBou
 function App({ Component, pageProps }: AppProps) {
   const { notification, clearNotification, walletAddress, setWalletAddress } = useAppStore();
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  // ── Hydration guard ──────────────────────────────────────────────────────
+  // React error #310 is caused by a server/client HTML mismatch.
+  // Zustand's persist middleware reads localStorage only on the client, so
+  // the first render on the server produces different HTML than the client
+  // rehydration pass. We suppress the mismatch by not rendering persisted
+  // state-dependent children until after the first client paint.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
 
   useEffect(() => {
     if (!notification) return;
@@ -126,7 +134,10 @@ function App({ Component, pageProps }: AppProps) {
         dappConfig={{ network: Network.TESTNET as any }}
         onError={handleWalletError}
       >
-        <Component {...pageProps} />
+        {/* Only render after client hydration to prevent React error #310 */}
+        {hydrated ? <Component {...pageProps} /> : (
+          <div className="min-h-screen bg-slate-950" aria-hidden />
+        )}
 
         {/* Toast notification */}
         {notification && (

@@ -121,10 +121,18 @@ export default function MintPage() {
           <div>
             <div className="text-5xl mb-4">🔍</div>
             <h1 className="text-2xl font-bold text-white mb-2">Collection Not Found</h1>
-            <p className="text-slate-400 mb-6">&ldquo;{collectionName}&rdquo; doesn&apos;t exist in your local collections.</p>
-            <a href="/dashboard" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold transition">
-              Back to Dashboard
-            </a>
+            <p className="text-slate-400 mb-2">&ldquo;{collectionName}&rdquo; is not in your local collections.</p>
+            <p className="text-slate-500 text-sm mb-6">
+              This may be a community collection. Create your own or explore available collections.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <a href="/explore" className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold transition">
+                🌐 Explore Collections
+              </a>
+              <a href="/dashboard" className="px-6 py-3 bg-slate-800 border border-slate-600 text-white rounded-xl font-semibold transition">
+                Back to Dashboard
+              </a>
+            </div>
           </div>
         </div>
       </main>

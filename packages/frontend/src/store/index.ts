@@ -1,6 +1,24 @@
 // Global app store using Zustand with persistence
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+
+// ─── SSR-safe storage helper ─────────────────────────────────────────────────
+// React error #310 happens when Zustand's persist middleware tries to access
+// localStorage during server-side rendering (SSR). We guard it with a check.
+const safeStorage = {
+  getItem: (key: string) => {
+    if (typeof window === 'undefined') return null;
+    try { return window.localStorage.getItem(key); } catch { return null; }
+  },
+  setItem: (key: string, value: string) => {
+    if (typeof window === 'undefined') return;
+    try { window.localStorage.setItem(key, value); } catch { /* ignore */ }
+  },
+  removeItem: (key: string) => {
+    if (typeof window === 'undefined') return;
+    try { window.localStorage.removeItem(key); } catch { /* ignore */ }
+  },
+};
 import type { NFTCollection, User, UploadProgress } from '@/types';
 
 interface DashboardCache {
@@ -116,11 +134,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'nfts2me-store',
-      storage: createJSONStorage(() =>
-        typeof window !== 'undefined'
-          ? window.localStorage
-          : { getItem: () => null, setItem: () => {}, removeItem: () => {} }
-      ),
+      storage: createJSONStorage(() => safeStorage),
       // Only persist collections and wallet address across refreshes
       partialize: (state) => ({
         walletAddress: state.walletAddress,

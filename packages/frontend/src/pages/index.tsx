@@ -126,8 +126,14 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/create"
+              href="/explore"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-lg font-bold rounded-xl hover:shadow-2xl hover:shadow-purple-500/40 transition-all"
+            >
+              🌐 Explore Collections
+            </a>
+            <a
+              href="/create"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 text-white text-lg font-semibold rounded-xl transition"
             >
               🎨 Create Collection
             </a>
