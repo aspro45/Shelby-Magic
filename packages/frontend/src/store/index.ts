@@ -3,8 +3,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 // ─── SSR-safe storage helper ─────────────────────────────────────────────────
-// React error #310 happens when Zustand's persist middleware tries to access
-// localStorage during server-side rendering (SSR). We guard it with a check.
 const safeStorage = {
   getItem: (key: string) => {
     if (typeof window === 'undefined') return null;
@@ -19,7 +17,37 @@ const safeStorage = {
     try { window.localStorage.removeItem(key); } catch { /* ignore */ }
   },
 };
+
 import type { NFTCollection, User, UploadProgress } from '@/types';
+
+// ─── Marketplace Types ────────────────────────────────────────────────────────
+export interface MarketListing {
+  id: string;
+  tokenId: string;
+  tokenName: string;
+  collectionName: string;
+  imageUrl: string;
+  seller: string;
+  priceApt: number;
+  description?: string;
+  createdAt: number;
+  status: 'active' | 'sold' | 'cancelled';
+  txHash?: string;
+}
+
+export interface MarketOffer {
+  id: string;
+  listingId: string;
+  tokenId: string;
+  collectionName: string;
+  tokenName: string;
+  buyer: string;
+  priceApt: number;
+  message?: string;
+  createdAt: number;
+  expiresAt: number;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+}
 
 interface DashboardCache {
   balance: string;
@@ -43,9 +71,13 @@ interface AppState {
   collections: NFTCollection[];
   selectedCollection: NFTCollection | null;
 
-  // Dashboard cache (60s TTL)
+  // Dashboard cache
   dashboardCache: DashboardCache | null;
   lastDashboardFetch: number;
+
+  // Marketplace
+  listings: MarketListing[];
+  offers: MarketOffer[];
 
   // UI state
   isLoading: boolean;
@@ -55,20 +87,33 @@ interface AppState {
     message: string;
   } | null;
 
-  // Actions
+  // Actions — wallet
   setWalletAddress: (address: string | null) => void;
   setIsConnecting: (value: boolean) => void;
   setUser: (user: User | null) => void;
+
+  // Actions — collections
   setCollections: (collections: NFTCollection[]) => void;
   setSelectedCollection: (collection: NFTCollection | null) => void;
+  addCollection: (collection: NFTCollection) => void;
+  updateCollection: (id: string, updates: Partial<NFTCollection>) => void;
+  removeCollection: (collectionId: string) => void;
+
+  // Actions — marketplace listings
+  addListing: (listing: MarketListing) => void;
+  updateListing: (id: string, updates: Partial<MarketListing>) => void;
+  removeListing: (id: string) => void;
+
+  // Actions — marketplace offers
+  addOffer: (offer: MarketOffer) => void;
+  updateOffer: (id: string, updates: Partial<MarketOffer>) => void;
+
+  // Actions — UI
   setIsLoading: (value: boolean) => void;
   setUploadProgress: (fileName: string, progress: UploadProgress) => void;
   clearUploadProgress: (fileName: string) => void;
   setNotification: (notification: AppState['notification']) => void;
   clearNotification: () => void;
-  addCollection: (collection: NFTCollection) => void;
-  updateCollection: (id: string, updates: Partial<NFTCollection>) => void;
-  removeCollection: (collectionId: string) => void;
   setDashboardCache: (cache: DashboardCache) => void;
   isDashboardCacheValid: () => boolean;
 }
@@ -83,6 +128,8 @@ export const useAppStore = create<AppState>()(
       selectedCollection: null,
       dashboardCache: null,
       lastDashboardFetch: 0,
+      listings: [],
+      offers: [],
       isLoading: false,
       uploadProgress: {},
       notification: null,
@@ -92,6 +139,34 @@ export const useAppStore = create<AppState>()(
       setUser: (user) => set({ user }),
       setCollections: (collections) => set({ collections }),
       setSelectedCollection: (collection) => set({ selectedCollection: collection }),
+
+      addCollection: (collection) =>
+        set((state) => ({ collections: [...state.collections, collection] })),
+      updateCollection: (id, updates) =>
+        set((state) => ({
+          collections: state.collections.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+        })),
+      removeCollection: (collectionId) =>
+        set((state) => ({
+          collections: state.collections.filter((c) => c.id !== collectionId),
+        })),
+
+      addListing: (listing) =>
+        set((state) => ({ listings: [listing, ...state.listings] })),
+      updateListing: (id, updates) =>
+        set((state) => ({
+          listings: state.listings.map((l) => (l.id === id ? { ...l, ...updates } : l)),
+        })),
+      removeListing: (id) =>
+        set((state) => ({ listings: state.listings.filter((l) => l.id !== id) })),
+
+      addOffer: (offer) =>
+        set((state) => ({ offers: [offer, ...state.offers] })),
+      updateOffer: (id, updates) =>
+        set((state) => ({
+          offers: state.offers.map((o) => (o.id === id ? { ...o, ...updates } : o)),
+        })),
+
       setIsLoading: (value) => set({ isLoading: value }),
       setUploadProgress: (fileName, progress) =>
         set((state) => ({
@@ -105,40 +180,22 @@ export const useAppStore = create<AppState>()(
         }),
       setNotification: (notification) => set({ notification }),
       clearNotification: () => set({ notification: null }),
-      addCollection: (collection) =>
-        set((state) => ({
-          collections: [...state.collections, collection],
-        })),
-      updateCollection: (id, updates) =>
-        set((state) => ({
-          collections: state.collections.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-        })),
-      removeCollection: (collectionId) =>
-        set((state) => ({
-          collections: state.collections.filter((c) => c.id !== collectionId),
-        })),
       setDashboardCache: (cache) =>
-        set({
-          dashboardCache: cache,
-          lastDashboardFetch: Date.now(),
-        }),
+        set({ dashboardCache: cache, lastDashboardFetch: Date.now() }),
       isDashboardCacheValid: () => {
         const state = get();
-        const now = Date.now();
-        const CACHE_TTL = 60000; // 60 seconds
-        return !!(
-          state.dashboardCache &&
-          now - state.lastDashboardFetch < CACHE_TTL
-        );
+        const CACHE_TTL = 60000;
+        return !!(state.dashboardCache && Date.now() - state.lastDashboardFetch < CACHE_TTL);
       },
     }),
     {
       name: 'nfts2me-store',
       storage: createJSONStorage(() => safeStorage),
-      // Only persist collections and wallet address across refreshes
       partialize: (state) => ({
         walletAddress: state.walletAddress,
         collections: state.collections,
+        listings: state.listings,
+        offers: state.offers,
       }),
     }
   )
